@@ -1,0 +1,6 @@
+Flask
+twilio
+python-dotenv
+openai
+whisper
+requests
