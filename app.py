@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import whisper
 import openai
 from datetime import datetime
+import requests
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -13,12 +14,10 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 WHATSAPP_NUMBER = os.getenv("WHATSAPP_NUMBER")
+APPLICATIONS_DIR = os.getenv("APPLICATIONS_DIR", "/tmp/applications")  # Папка для заявок
 
 # Настройка клиента Twilio
 client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-
-# Папка для заявок (относительный путь)
-APPLICATIONS_DIR = os.path.join(r"E:\Users\vid3\Desktop\BOT", "заявки")
 
 # Убедимся, что папка существует
 os.makedirs(APPLICATIONS_DIR, exist_ok=True)
@@ -127,13 +126,12 @@ def webhook():
 
 def download_audio(media_url):
     """Скачивание аудио файла по URL из Twilio"""
-    import requests
     response = requests.get(media_url)
-    file_path = os.path.join(r"E:\Users\vid3\Desktop\BOT", "audio_message.mp3")
+    file_path = os.path.join(APPLICATIONS_DIR, "audio_message.mp3")
     with open(file_path, "wb") as f:
         f.write(response.content)
     return file_path
 
 if __name__ == "__main__":
     # Запуск сервера Flask для получения Webhook от Twilio
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=int(os.getenv("PORT", 5000)))
