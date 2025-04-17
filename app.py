@@ -6,6 +6,7 @@ import whisper
 import openai
 from datetime import datetime
 import requests
+import asyncio
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -23,13 +24,13 @@ client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 os.makedirs(APPLICATIONS_DIR, exist_ok=True)
 
 # Whisper — транскрипция аудио
-def transcribe_audio(file_path):
-    model = whisper.load_model("small")
+async def transcribe_audio(file_path):
+    model = whisper.load_model("small")  # Используем более легкую модель
     result = model.transcribe(file_path, language="ru")
     return result["text"]
 
 # GPT — создать заявку по строгому шаблону
-def create_application(user_text, username):
+async def create_application(user_text, username):
     openai.api_key = OPENAI_API_KEY
     try:
         prompt = (
@@ -49,8 +50,6 @@ def create_application(user_text, username):
             temperature=0.3
         )
         application_text = response['choices'][0]['message']['content'].strip()
-
-        print(f"Ответ GPT: {application_text}")  # Выводим ответ GPT для отладки
         return application_text
     except Exception as e:
         print(f"Ошибка общения с GPT: {e}")
@@ -87,7 +86,7 @@ def send_whatsapp_message(to_number, message):
 app = Flask(__name__)
 
 @app.route("/webhook", methods=["POST"])
-def webhook():
+async def webhook():
     """Обработка входящего сообщения от Twilio"""
     from_number = request.form['From']  # Номер отправителя
     message_body = request.form['Body']  # Текст сообщения
@@ -103,11 +102,11 @@ def webhook():
     if media_url:
         # Скачиваем аудио файл и транскрибируем его
         audio_file = download_audio(media_url)
-        user_text = transcribe_audio(audio_file)
+        user_text = await transcribe_audio(audio_file)
         print(f"Транскрибированное аудио: {user_text}")
 
     # Создаем заявку
-    application_text = create_application(user_text, username)
+    application_text = await create_application(user_text, username)
 
     if application_text:
         # Сохраняем заявку в файл
