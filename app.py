@@ -43,8 +43,10 @@ def create_application(user_text, username):
         )
         response = openai.ChatCompletion.create(
             model="gpt-4",
-            messages=[{"role": "system", "content": "Ты помощник по оформлению заявок."},
-                      {"role": "user", "content": prompt}],
+            messages=[
+                {"role": "system", "content": "Ты помощник по оформлению заявок."},
+                {"role": "user", "content": prompt}
+            ],
             max_tokens=1000,
             temperature=0.3
         )
@@ -74,8 +76,8 @@ def send_whatsapp_message(to_number, message):
     try:
         message_sent = client.messages.create(
             body=message,
-            from_=f'whatsapp:{WHATSAPP_NUMBER}',  # Ваш номер WhatsApp в Twilio
-            to=f'whatsapp:{to_number}'  # Номер получателя
+            from_=f'whatsapp:{WHATSAPP_NUMBER}',
+            to=f'whatsapp:{to_number}'
         )
         print(f"Сообщение отправлено: {message_sent.sid}")
     except Exception as e:
@@ -84,11 +86,16 @@ def send_whatsapp_message(to_number, message):
 # Инициализация Flask приложения
 app = Flask(__name__)
 
+@app.route("/", methods=["GET"])
+def index():
+    """Приветственная страница"""
+    return "✅ Сервер работает!"
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
     """Обработка входящего сообщения от Twilio"""
-    from_number = request.form['From']  # Номер отправителя
-    message_body = request.form['Body']  # Текст сообщения
+    from_number = request.form.get('From')
+    message_body = request.form.get('Body')
 
     print(f"Входящее сообщение от {from_number}: {message_body}")
     
@@ -101,8 +108,11 @@ def webhook():
     if media_url:
         # Скачиваем аудио файл и транскрибируем его
         audio_file = download_audio(media_url)
-        user_text = transcribe_audio(audio_file)
-        print(f"Транскрибированное аудио: {user_text}")
+        if audio_file:
+            user_text = transcribe_audio(audio_file)
+            print(f"Транскрибированное аудио: {user_text}")
+        else:
+            send_whatsapp_message(from_number, "❌ Ошибка при загрузке аудио файла.")
 
     # Создаем заявку
     application_text = create_application(user_text, username)
@@ -111,13 +121,10 @@ def webhook():
         # Сохраняем заявку в файл
         saved_filename = save_application(application_text, username)
         if saved_filename:
-            # Отправляем ответ в WhatsApp
             send_whatsapp_message(from_number, "✅ Заявка обработана и сохранена. Спасибо!")
         else:
-            # Если не удалось сохранить заявку
             send_whatsapp_message(from_number, "❌ Заявка не была сохранена, так как текст пуст.")
     else:
-        # Если не удалось создать заявку
         send_whatsapp_message(from_number, "❌ Не удалось обработать заявку. Попробуйте позже.")
     
     return "OK", 200
@@ -135,5 +142,4 @@ def download_audio(media_url):
         return None
 
 if __name__ == "__main__":
-    # Запуск сервера Flask для получения Webhook от Twilio
     app.run(debug=False, host='0.0.0.0', port=int(os.getenv("PORT", 5000)))
