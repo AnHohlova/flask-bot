@@ -94,6 +94,7 @@ def index():
 @app.route("/webhook", methods=["POST"])
 def webhook():
     """Обработка входящего сообщения от Twilio"""
+    print("Получен запрос:", request.form)  # <<< ЭТО ДОБАВЬ
     from_number = request.form.get('From')
     message_body = request.form.get('Body')
 
