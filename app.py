@@ -81,7 +81,7 @@ def send_whatsapp_message(to_number, message):
         message_sent = client.messages.create(
             body=message,
             from_=f'whatsapp:{WHATSAPP_NUMBER}',
-            to=f'whatsapp:{to_number}'
+            to=to_number  # Здесь уже не добавляем лишний префикс
         )
         print(f"Сообщение отправлено: {message_sent.sid}")
     except Exception as e:
