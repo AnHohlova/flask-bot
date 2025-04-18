@@ -15,7 +15,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 WHATSAPP_NUMBER = os.getenv("WHATSAPP_NUMBER")
-APPLICATIONS_DIR = os.getenv("APPLICATIONS_DIR", "applications")  # Папка для заявок
+APPLICATIONS_DIR = os.getenv("APPLICATIONS_DIR", "BOT\applications")  # Папка для заявок
 
 # Настройка клиента Twilio
 client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
