@@ -6,6 +6,7 @@ import whisper
 import openai
 from datetime import datetime
 import requests
+from openai import OpenAI
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -30,7 +31,7 @@ def transcribe_audio(file_path):
 
 # GPT — создать заявку по строгому шаблону
 def create_application(user_text, username):
-    openai.api_key = OPENAI_API_KEY
+    client = OpenAI(api_key=OPENAI_API_KEY)
     try:
         prompt = (
             f"На основе следующего описания проблемы или идеи:\n\n"
@@ -41,7 +42,7 @@ def create_application(user_text, username):
             f"3. Цель или описание заявки: (развернуто опиши суть)\n\n"
             f"Ответ должен строго соответствовать этой форме, без лишнего текста!"
         )
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "Ты помощник по оформлению заявок."},
@@ -50,7 +51,7 @@ def create_application(user_text, username):
             max_tokens=1000,
             temperature=0.3
         )
-        application_text = response['choices'][0]['message']['content'].strip()
+        application_text = response.choices[0].message.content.strip()
         return application_text
     except Exception as e:
         print(f"Ошибка общения с GPT: {e}")
