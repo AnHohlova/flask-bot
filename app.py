@@ -75,6 +75,8 @@ def save_application(application_text, username):
 # Функция для отправки сообщения через WhatsApp с использованием Twilio
 def send_whatsapp_message(to_number, message):
     try:
+        if not to_number.startswith("whatsapp:"):
+            to_number = f"whatsapp:{to_number}"
         message_sent = client.messages.create(
             body=message,
             from_=f'whatsapp:{WHATSAPP_NUMBER}',
