@@ -76,12 +76,15 @@ def save_application(application_text, username):
 def send_whatsapp_message(to_number, message):
     try:
         print(f"Отправка сообщения на номер: {to_number}")  # Для отладки
-        if not to_number.startswith("whatsapp:"):
-            to_number = f"whatsapp:{to_number}"
+        # Убираем повторение, если уже есть префикс
+        if to_number.startswith("whatsapp:"):
+            to_number = to_number.replace("whatsapp:", "")
+        to_number = f"whatsapp:{to_number}"
+        
         message_sent = client.messages.create(
             body=message,
             from_=f'whatsapp:{WHATSAPP_NUMBER}',
-            to=to_number  # Здесь уже не добавляем лишний префикс
+            to=to_number
         )
         print(f"Сообщение отправлено: {message_sent.sid}")
     except Exception as e:
