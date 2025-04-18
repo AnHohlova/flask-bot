@@ -42,7 +42,7 @@ def create_application(user_text, username):
             f"Ответ должен строго соответствовать этой форме, без лишнего текста!"
         )
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "Ты помощник по оформлению заявок."},
                 {"role": "user", "content": prompt}
