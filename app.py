@@ -15,9 +15,9 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 WHATSAPP_NUMBER = os.getenv("WHATSAPP_NUMBER")
-APPLICATIONS_DIR = os.getenv("APPLICATIONS_DIR", "BOT\\applications")  # ВНИМАНИЕ: двойной \\ для Windows путей
+APPLICATIONS_DIR = os.getenv("APPLICATIONS_DIR", "BOT\\applications")
 
-ADMIN_NUMBER = "+77476123370"  # <-- ТВОЙ НОМЕР
+ADMIN_NUMBER = "+77476123370"  # Номер администратора
 
 # Настройка клиента Twilio
 client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
@@ -121,10 +121,13 @@ def webhook():
             with open(saved_filename, "r", encoding="utf-8") as f:
                 file_text = f.read()
             send_whatsapp_message(ADMIN_NUMBER, f"✅ Новая заявка:\n\n{file_text}")
+            send_whatsapp_message(from_number, "✅ Ваша заявка успешно принята и отправлена!")  # <-- ОТПРАВКА ПОЛЬЗОВАТЕЛЮ
         else:
             send_whatsapp_message(ADMIN_NUMBER, "❌ Ошибка: заявка не была сохранена.")
+            send_whatsapp_message(from_number, "❌ Произошла ошибка при сохранении заявки.")
     else:
         send_whatsapp_message(ADMIN_NUMBER, "❌ Ошибка: не удалось создать заявку.")
+        send_whatsapp_message(from_number, "❌ Не удалось создать заявку. Попробуйте позже.")
 
     return "OK", 200
 
